@@ -64,9 +64,11 @@ const GoogleOauthPopup = () => {
   }, [externalWindow])
 
   return (
-    <button type='button' className='button text-4xl' onClick={onClick} aria-label={GOOGLE_OAUTH}>
-      Login with Google
-    </button>
+    <div className="flex h-screen items-center justify-center">
+      <button type="button" className="button text-4xl" onClick={onClick} aria-label={GOOGLE_OAUTH}>
+        Login with Google
+      </button>
+    </div>
   )
 }
 
