@@ -8,7 +8,7 @@ function Home() {
       <div className="text-lg">email@email.com</div>
 
       <div className="bg-missive-light-border-color mt-2 p-4">
-        <div className="pt-2">First reply on <span className="font-bold">Wed May 1, 2024 </span></div>
+        <div className="pt-2">First reply on <span className="font-bold">Wed May 1, 2024</span></div>
         <div className="pt-2">Most recent reply on <span className="font-bold">Wed June 5, 2024</span></div>
         <div className="pt-2">Segment: <span className="font-bold">Connected</span></div>
         <div className="pt-2">Zip code: <span className="font-bold">48127</span></div>
