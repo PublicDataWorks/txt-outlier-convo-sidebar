@@ -23,7 +23,7 @@ const config = {
         'rgba-missive-text-color-a': 'rgba(var(--missive-text-color-a), 0.05)'
       },
       borderRadius: {
-        'missive-border-radius': 'var(--missive-border-radius)',
+        'missive-border-radius': 'var(--missive-border-radius)'
       }
     }
   }

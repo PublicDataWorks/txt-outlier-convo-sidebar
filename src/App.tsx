@@ -10,14 +10,12 @@ export default function App(): ReactElement {
     <Routes>
       <Route path={LOGIN_PATH} element={<GoogleOauthPopup />} />
       <Route path={LOGOUT_PATH} element={<Logout />} />
-      <Route path="*" element={<Home />} />
+      <Route path='*' element={<Home />} />
     </Routes>
   )
   return (
     <BrowserRouter>
-      <div className="bg-missive-background-color text-missive-text-color-a w-96 h-screen overflow-scroll">
-        {router}
-      </div>
+      <div className='h-screen overflow-scroll bg-missive-background-color text-missive-text-color-a'>{router}</div>
     </BrowserRouter>
   )
 }

@@ -1,32 +1,37 @@
 type StorageValue = Record<string, unknown> | unknown[] | string
 
-interface FormData {
+interface Conversation {
+  labels: Label[]
+  authors: Author[]
+  messages: Message[]
+}
+
+interface Label {
+  id: string
   name: string
-  fields: never[]
-  comments: never[]
-  notes: never[]
-  buttons: never[]
-  options: {
-    autoClose: boolean
-  }
+}
+
+interface Author {
+  name: string
+  phone_number: string
+}
+
+interface Message {
+  from_field: { phone_number: string }
+  delivered_at: number
+  author: { first_name: string; last_name: string } | null
 }
 
 declare class MissiveClass {
   public constructor()
 
-  public storeGet<T extends StorageValue>(key: string): Promise<T>
+  public async storeGet<T extends StorageValue>(key: string): Promise<T>
 
   public storeSet(key: string, data: StorageValue): void
 
-  public openForm(data: {
-    buttons: { label: string; type: string }[]
-    name: string
-    fields: { data: { subtitle: string[] }; type: string }[]
-  }): Promise<never>
+  public on(event: string, callback: (ids: string[]) => void): void
 
-  public closeForm(): Promise<never>
-
-  public alert(options: { title: string; message: string; note: string }): Promise<never>
+  public async fetchConversations(ids: string[]): Promise<Conversation[]>
 }
 
 declare const Missive: InstanceType<typeof MissiveClass>
