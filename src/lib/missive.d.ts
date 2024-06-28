@@ -1,6 +1,7 @@
 type StorageValue = Record<string, unknown> | unknown[] | string
 
 interface Conversation {
+  id: string
   labels: Label[]
   authors: Author[]
   messages: Message[]
