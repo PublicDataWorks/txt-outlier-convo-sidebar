@@ -15,7 +15,7 @@ const GoogleOauthPopup = () => {
 
   const onToken = (token: string) => {
     updateToken(token)
-    navigate('/', { replace: true }) // TODO: make it constant
+    navigate('/', { replace: true })
   }
 
   const onClick = () => {
