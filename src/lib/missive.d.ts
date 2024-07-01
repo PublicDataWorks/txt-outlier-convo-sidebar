@@ -10,6 +10,7 @@ interface Conversation {
 interface Label {
   id: string
   name: string
+  parent_id: string
 }
 
 interface Author {
@@ -33,6 +34,8 @@ declare class MissiveClass {
   public on(event: string, callback: (ids: string[]) => void): void
 
   public async fetchConversations(ids: string[]): Promise<Conversation[]>
+
+  public async fetchLabels(): Promise<Label[]>
 }
 
 declare const Missive: InstanceType<typeof MissiveClass>

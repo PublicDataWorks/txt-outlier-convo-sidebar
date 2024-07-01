@@ -18,7 +18,7 @@ const useConversationSummaryQuery = (conversationId: string, reference: string) 
   useQuery({
     queryKey: ['conversationSummary', conversationId, reference],
     queryFn: async (): Promise<AxiosResponse<ConversationSummary>> =>
-      axios.get(`${CONVERSATION_SUMMARY_PATH}?conversation_id=${conversationId}&reference=${reference}`)
+      axios.get(`${CONVERSATION_SUMMARY_PATH}/${conversationId}?reference=${reference}`)
     ,
     enabled: !!conversationId && !!reference,
   })
