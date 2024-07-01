@@ -25,6 +25,8 @@ function Home() {
     conversationId: '',
     reference: ''
   })
+  const [keywordLabels, setKeywordLabels] = useState<string[]>([])
+  const [impactLabels, setImpactLabels] = useState<string[]>([])
   const [error, setError] = useState<string | undefined>('Please select an SMS conversation')
   const { data, isPending } = useConversationSummaryQuery(queryParams.conversationId, queryParams.reference)
   const handleConversationChange = debounce((ids: string[]) => {
@@ -49,6 +51,7 @@ function Home() {
 
           params.conversationId = convo.id
           params.reference = contact.phone_number
+
           setError(undefined)
         } else {
           setError('Invalid conversation type. Please select an SMS conversation.')
@@ -62,8 +65,29 @@ function Home() {
 
   useEffect(() => {
     Missive.on('change:conversations', handleConversationChange)
-    Missive.fetchLabels().then(labels => console.log(JSON.stringify(labels)))
   }, [])
+
+  useEffect(() => {
+    if (data?.data) {
+      void Missive.fetchLabels().then(missivelabels => {
+        const labelWithInfo = data.data.labels
+          .map(labelId => missivelabels.find(label => label.id === labelId))
+
+        const keywords = labelWithInfo
+          .filter(label => label?.parent_id === import.meta.env.VITE_KEYWORD_LABEL_ID)
+          // @ts-expect-error TS doesn't recognize that filter ensures non-null values
+          .map(label => label.name)
+
+        const impacts = labelWithInfo
+          .filter(label => label && label.parent_id !== import.meta.env.VITE_KEYWORD_LABEL_ID)
+          // @ts-expect-error TS doesn't recognize that filter ensures non-null values
+          .map(label => label.name)
+
+        setKeywordLabels(keywords)
+        setImpactLabels(impacts)
+      })
+    }
+  }, [data])
 
   if (error) {
     return <div>{error}</div>
@@ -74,7 +98,6 @@ function Home() {
   }
   const conversation = data.data
 
-  const impactTags = ['Satisfied', 'Accountability gap']
   return (
     <div className="px-4 pt-2">
       <div className="text-xl font-bold">{contactInfo.name}</div>
@@ -103,11 +126,11 @@ function Home() {
         </div>
         <div className="py-2">Tags</div>
         <div className="flex flex-wrap gap-2">
-          {/* {contactInfo?.tags.map(tag => ( */}
-          {/*  <div key={tag} className="rounded-missive-border-radius bg-missive-text-color-d px-2 py-2 font-bold"> */}
-          {/*    {tag} */}
-          {/*  </div> */}
-          {/* ))} */}
+          {keywordLabels.map(tag => (
+            <div key={tag} className="rounded-missive-border-radius bg-missive-text-color-d px-2 py-2 font-bold">
+              {tag}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -119,7 +142,7 @@ function Home() {
         <div className="pb-2 italic">{conversation.outcome}</div>
         Impact tags
         <div className="flex flex-wrap gap-2 pt-2">
-          {impactTags.map(tag => (
+          {impactLabels.map(tag => (
             <div key={tag} className="rounded-missive-border-radius bg-missive-text-color-d px-2 py-2 font-bold">
               {tag}
             </div>
