@@ -27,6 +27,7 @@ function Home() {
   })
   const [keywordLabels, setKeywordLabels] = useState<string[]>([])
   const [impactLabels, setImpactLabels] = useState<string[]>([])
+  // error === undefined means no error, empty string means an error without message
   const [error, setError] = useState<string | undefined>('Please select an SMS conversation')
   const { data, isPending } = useConversationSummaryQuery(queryParams.conversationId, queryParams.reference)
   const handleConversationChange = debounce((ids: string[]) => {
@@ -54,7 +55,7 @@ function Home() {
 
           setError(undefined)
         } else {
-          setError('Invalid conversation type. Please select an SMS conversation.')
+          setError('')
         }
         setContactInfo(info)
         setQueryParams(params)
@@ -89,7 +90,8 @@ function Home() {
     }
   }, [data])
 
-  if (error) {
+  if (error !== undefined) {
+    // empty string is considered as an error that doesn't carry message
     return <div>{error}</div>
   }
 
@@ -104,8 +106,8 @@ function Home() {
       <div className="text-lg">{contactInfo.phoneNumber}</div>
       <div className="text-lg">{conversation.author_email}</div>
 
-      <div className="mt-2 rounded-sm bg-missive-light-border-color p-4">
-        <div className="pt-2">
+      <div className="mt-2 rounded-xl bg-missive-light-border-color p-4">
+        <div>
           First reply on <span className="font-bold">{conversation.first_reply?.toISOString()}</span>
         </div>
         <div className="pt-2">
@@ -115,16 +117,12 @@ function Home() {
           </span>
         </div>
         <div className="pt-2">
-          Segment: <span className="font-bold">Connected</span>
-        </div>
-        <div className="pt-2">
           Zip code: <span className="font-bold">{conversation.author_zipcode}</span>
         </div>
         <div className="pt-2">
           Reporters contacted:{' '}
           <span className="font-bold">{conversation.assignee_user_name.join(', ')}</span>
         </div>
-        <div className="py-2">Tags</div>
         <div className="flex flex-wrap gap-2">
           {keywordLabels.map(tag => (
             <div key={tag} className="rounded-missive-border-radius bg-missive-text-color-d px-2 py-2 font-bold">
@@ -134,13 +132,12 @@ function Home() {
         </div>
       </div>
 
-      <div className="mb-2 mt-4 font-bold">Reporters Notes</div>
-      <div className="rounded-sm bg-missive-light-border-color p-4 italic">{conversation.comments}</div>
+      <div className="mb-2 mt-4 font-bold">Reporter notes</div>
+      <div className="rounded-xl bg-missive-light-border-color p-4 italic">{conversation.comments}</div>
 
       <div className="mb-2 mt-4 font-bold">Impact and outcomes</div>
-      <div className="rounded-sm bg-missive-light-border-color p-4">
+      <div className="rounded-xl bg-missive-light-border-color p-4">
         <div className="pb-2 italic">{conversation.outcome}</div>
-        Impact tags
         <div className="flex flex-wrap gap-2 pt-2">
           {impactLabels.map(tag => (
             <div key={tag} className="rounded-missive-border-radius bg-missive-text-color-d px-2 py-2 font-bold">
@@ -151,7 +148,7 @@ function Home() {
       </div>
 
       <div className="mb-2 mt-4 font-bold">Communication patterns</div>
-      <div className="rounded-sm bg-missive-light-border-color p-4 italic">{conversation.messages}</div>
+      <div className="rounded-xl bg-missive-light-border-color p-4 italic">{conversation.messages}</div>
     </div>
   )
 }

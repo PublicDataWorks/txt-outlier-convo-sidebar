@@ -15,7 +15,7 @@ export default function App(): ReactElement {
   )
   return (
     <BrowserRouter>
-      <div className='h-screen overflow-scroll bg-missive-background-color text-missive-text-color-a'>{router}</div>
+      <div className='h-screen overflow-y-scroll bg-missive-background-color text-missive-text-color-a missive-scroll'>{router}</div>
     </BrowserRouter>
   )
 }

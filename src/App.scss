@@ -19,3 +19,8 @@
   height: 100svh;
   --blueColorRGB: 58, 130, 247;
 }
+
+.missive-scroll::-webkit-scrollbar {
+    height: 12px;
+    width: 12px;
+}
