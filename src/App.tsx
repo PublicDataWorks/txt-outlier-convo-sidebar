@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Route, Routes, BrowserRouter } from 'react-router-dom'
+import { Route, Routes, HashRouter } from 'react-router-dom'
 import { LOGIN_PATH, LOGOUT_PATH } from './constants/routes'
 import GoogleOauthPopup from './components/GoogleOauthPopup'
 import Logout from './components/Logout'
@@ -15,8 +15,8 @@ export default function App(): ReactElement {
     </Routes>
   )
   return (
-    <BrowserRouter>
-      <div className="h-screen overflow-scroll bg-missive-background-color text-missive-text-color-a">{router}</div>
-    </BrowserRouter>
+    <HashRouter>
+      <div className='h-screen overflow-y-scroll bg-missive-background-color text-missive-text-color-a missive-scroll'>{router}</div>
+    </HashRouter>
   )
 }

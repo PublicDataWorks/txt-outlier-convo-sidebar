@@ -2,7 +2,7 @@ import { format } from 'date-fns'
 
 function formatUnixTimestamp(unixTimestamp: number): string {
   const date = new Date(unixTimestamp * 1000)
-  return format(date, 'EEE MMM d, yyyy')
+  return format(date, 'MMM d, yyyy')
 }
 
 export {

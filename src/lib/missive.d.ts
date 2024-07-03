@@ -1,6 +1,7 @@
 type StorageValue = Record<string, unknown> | unknown[] | string
 
 interface Conversation {
+  id: string
   labels: Label[]
   authors: Author[]
   messages: Message[]
@@ -23,6 +24,7 @@ interface User {
 interface Label {
   id: string
   name: string
+  parent_id: string
 }
 
 interface Author {
@@ -46,6 +48,8 @@ declare class MissiveClass {
   public on(event: string, callback: (ids: string[]) => void): void
 
   public async fetchConversations(ids: string[]): Promise<Conversation[]>
+
+  public async fetchLabels(): Promise<Label[]>
 
   public async fetchOrganizations(): Promise<Organization[]>
 }
