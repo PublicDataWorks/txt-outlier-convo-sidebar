@@ -1,3 +1,4 @@
+import type { ReactNode} from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import axios from '../lib/axios'
@@ -14,21 +15,18 @@ const TokenContext = createContext<TokenContextValue>({} as TokenContextValue)
 const TokenChangedContext = createContext<TokenChangedValue>({} as TokenChangedValue)
 
 interface AuthProviderProperties {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 function AuthProvider({ children }: AuthProviderProperties) {
-  const [token, setToken] = useState<string>() // TODO: Do we need this?
+  const [token, setToken] = useState<string>()
 
   const updateToken = useCallback((accessToken: string | null) => {
     let authHeader = ''
     if (accessToken) {
-      if (accessToken.startsWith('Bearer ')) {
-        authHeader = accessToken
-      } else {
-        authHeader = `Bearer ${accessToken}`
-      }
+      authHeader = accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`
     }
+
     axios.defaults.headers.common.Authorization = authHeader
     Missive.storeSet('token', authHeader)
     setToken(authHeader)

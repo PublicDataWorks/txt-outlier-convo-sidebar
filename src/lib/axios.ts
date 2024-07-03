@@ -10,7 +10,8 @@ axios.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
     if (error.response?.status === 401 || error.response?.status === 403) {
-      window.location.href = LOGOUT_PATH;
+      // HashRouter due to hosting on S3
+      window.location.href = `#${LOGOUT_PATH}`;
     }
     return Promise.reject(error);
   }

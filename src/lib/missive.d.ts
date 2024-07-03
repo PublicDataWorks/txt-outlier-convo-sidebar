@@ -7,6 +7,20 @@ interface Conversation {
   messages: Message[]
 }
 
+interface Organization {
+  teams: Team[]
+}
+
+interface Team {
+  users: User[]
+  id: string
+  name: string
+}
+
+interface User {
+  me: boolean
+}
+
 interface Label {
   id: string
   name: string
@@ -36,6 +50,8 @@ declare class MissiveClass {
   public async fetchConversations(ids: string[]): Promise<Conversation[]>
 
   public async fetchLabels(): Promise<Label[]>
+
+  public async fetchOrganizations(): Promise<Organization[]>
 }
 
 declare const Missive: InstanceType<typeof MissiveClass>

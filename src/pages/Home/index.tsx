@@ -27,9 +27,9 @@ function Home() {
   })
   const [keywordLabels, setKeywordLabels] = useState<string[]>([])
   const [impactLabels, setImpactLabels] = useState<string[]>([])
-  // error === undefined means no error, empty string means an error without message
-  const [error, setError] = useState<string | undefined>('Please select an SMS conversation')
-  const { data, isPending } = useConversationSummaryQuery(queryParams.conversationId, queryParams.reference)
+  // errorMsg === undefined means no error, empty string means an error without message
+  const [errorMsg, setErrorMsg] = useState<string | undefined>('Please select an SMS conversation')
+  const { data, isPending, error } = useConversationSummaryQuery(queryParams.conversationId, queryParams.reference)
   const handleConversationChange = debounce((ids: string[]) => {
     Missive.fetchConversations(ids)
       .then(conversations => {
@@ -53,9 +53,9 @@ function Home() {
           params.conversationId = convo.id
           params.reference = contact.phone_number
 
-          setError(undefined)
+          setErrorMsg(undefined)
         } else {
-          setError('')
+          setErrorMsg('')
         }
         setContactInfo(info)
         setQueryParams(params)
@@ -90,12 +90,12 @@ function Home() {
     }
   }, [data])
 
-  if (error !== undefined) {
+  if (errorMsg !== undefined || error) {
     // empty string is considered as an error that doesn't carry message
-    return <div>{error}</div>
+    return <div>{error ? error.message : errorMsg}</div>
   }
 
-  if (isPending || !data?.data) {
+  if (isPending) {
     return <Spinner />
   }
   const conversation = data.data
