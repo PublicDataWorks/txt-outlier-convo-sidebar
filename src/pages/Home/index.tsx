@@ -7,7 +7,6 @@ import Spinner from '../../components/Spinner'
 interface ContactInfo {
   name: string
   phoneNumber: string
-  mostRecentReplyAt: number | undefined
 }
 
 interface QueryParams {
@@ -19,7 +18,6 @@ function Home() {
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     name: '',
     phoneNumber: '',
-    mostRecentReplyAt: undefined
   })
   const [queryParams, setQueryParams] = useState<QueryParams>({
     conversationId: '',
@@ -37,7 +35,7 @@ function Home() {
           // Select multiple tabs, that means user is not reading the conversation
           return
         }
-        const info: ContactInfo = { name: '', phoneNumber: '', mostRecentReplyAt: undefined }
+        const info: ContactInfo = { name: '', phoneNumber: '' }
         const params: QueryParams = { conversationId: '', reference: '' }
         // TS thinks it's a Conversation | undefined if we don't cast
         const convo: Conversation = conversations[0] as Conversation
@@ -45,11 +43,6 @@ function Home() {
         if (contact) {
           info.name = contact.name
           info.phoneNumber = contact.phone_number
-          info.mostRecentReplyAt = convo.messages
-            .slice()
-            .reverse()
-            .find(message => message.from_field.phone_number === contact.phone_number)?.delivered_at
-
           params.conversationId = convo.id
           params.reference = contact.phone_number
 
@@ -108,12 +101,12 @@ function Home() {
 
       <div className="mt-2 rounded-xl bg-missive-light-border-color p-4">
         <div>
-          First reply on <span className="font-bold">{conversation.first_reply?.toISOString()}</span>
+          First reply on <span className="font-bold">{formatUnixTimestamp(conversation.first_reply)}</span>
         </div>
         <div className="pt-2">
           Most recent reply on{' '}
           <span className="font-bold">
-            {contactInfo.mostRecentReplyAt && contactInfo.mostRecentReplyAt > 0 ? formatUnixTimestamp(contactInfo.mostRecentReplyAt) : ''}
+            {formatUnixTimestamp(conversation.most_recent_reply)}
           </span>
         </div>
         <div className="pt-2">
