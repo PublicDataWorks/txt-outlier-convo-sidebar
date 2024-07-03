@@ -20,29 +20,8 @@ interface AuthProviderProperties {
 
 function AuthProvider({ children }: AuthProviderProperties) {
   const [token, setToken] = useState<string>()
-  const [intervalId, setIntervalId] = useState<NodeJS.Timeout>()
 
   const updateToken = useCallback((accessToken: string | null) => {
-    if (!token && accessToken) {
-      // Login
-      const newIntervalId = setInterval(() => {
-        Missive.fetchOrganizations().then(orgs => {
-          if (!orgs[0]) return
-          const teamIds =
-            orgs[0].teams.filter(team => team.users.find(user => user.me)).map(team => team.id)
-          // Authorized by the teams the user is in
-          axios.defaults.headers.common['X-Teams'] = teamIds.join(', ')
-          // eslint-disable-next-line no-console
-        }).catch(console.error)
-      }, 10000)
-      setIntervalId(newIntervalId)
-    } else if (token && !accessToken) {
-      // Logout
-      clearInterval(intervalId)
-      setIntervalId(undefined)
-      axios.defaults.headers.common['X-Teams'] = undefined
-    }
-
     let authHeader = ''
     if (accessToken) {
       authHeader = accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`
