@@ -50,8 +50,6 @@ declare class MissiveClass {
   public async fetchConversations(ids: string[]): Promise<Conversation[]>
 
   public async fetchLabels(): Promise<Label[]>
-
-  public async fetchOrganizations(): Promise<Organization[]>
 }
 
 declare const Missive: InstanceType<typeof MissiveClass>

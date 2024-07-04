@@ -8,7 +8,8 @@ interface ConversationSummary {
   author_email: string
   author_zipcode: string
   comments: string
-  first_reply: Date | undefined
+  first_reply: number
+  last_reply: number
   labels: string[]
   messages: string
   outcome: string
@@ -21,6 +22,7 @@ const useConversationSummaryQuery = (conversationId: string, reference: string) 
       axios.get(`${CONVERSATION_SUMMARY_PATH}/${conversationId}?reference=${reference}`)
     ,
     enabled: !!conversationId && !!reference,
+    refetchInterval: 1000 * 30
   })
 
 export { useConversationSummaryQuery }
