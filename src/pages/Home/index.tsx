@@ -17,7 +17,7 @@ interface QueryParams {
 function Home() {
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     name: '',
-    phoneNumber: '',
+    phoneNumber: ''
   })
   const [queryParams, setQueryParams] = useState<QueryParams>({
     conversationId: '',
@@ -97,7 +97,15 @@ function Home() {
     <div className="px-4 pt-2">
       <div className="text-xl font-bold">{contactInfo.name}</div>
       <div className="text-lg">{contactInfo.phoneNumber}</div>
-      <div className="text-lg">{conversation.author_email}</div>
+      <div className="relative z-0">
+        <input type="text" id="floating-email"
+               className="block py-2.5 px-0 w-full text-lg bg-transparent appearance-none focus:outline-none focus:ring-0 peer focus:shadow-none text-missive-text-color-e cursor-text"
+               placeholder={conversation.author_email || ' '} />
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+        <label htmlFor="floating-email"
+               className="text-missive-text-color-e cursor-text peer-focus:text-missive-blue-color absolute text-lg duration-300 transform -translate-y-6 scale-75 top-3 origin-[0] peer-focus:start-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">
+          Email</label>
+      </div>
 
       <div className="mt-2 rounded-xl bg-missive-light-border-color p-4">
         <div>
@@ -109,9 +117,19 @@ function Home() {
             {formatUnixTimestamp(conversation.last_reply)}
           </span>
         </div>
-        <div className="pt-2">
-          Zip code: <span className="font-bold">{conversation.author_zipcode}</span>
+        <div className="pt-2 flex">
+          <div>Zip code:</div>
+          <div className="relative z-0 ml-1">
+            <input type="number" id="floating-zipcode"
+                   className="block w-full p-0 text-sm appearance-none focus:outline-none focus:ring-0 peer focus:shadow-none text-missive-text-color-e cursor-text"
+                   placeholder={conversation.author_zipcode || ' '} />
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+            <label htmlFor="floating-zipcode"
+                   className="px-2 text-missive-text-color-e cursor-text peer-focus:text-missive-blue-color absolute text-sm top-0 duration-300 transform -translate-y-4 scale-75 origin-[0] peer-focus:start-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">
+              Zip code</label>
+          </div>
         </div>
+
         <div className="pt-2">
           Reporters contacted:{' '}
           <span className="font-bold">{conversation.assignee_user_name.join(', ')}</span>
