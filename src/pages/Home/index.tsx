@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react'
+import type { ChangeEvent } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { debounce } from 'lodash'
 import { formatUnixTimestamp } from '../../helpers/date'
-import { useConversationSummaryQuery } from '../../hooks/conversation'
+import { useConversationSummaryQuery, useUpdateConversationSummary } from '../../hooks/conversation'
 import Spinner from '../../components/Spinner'
+import type { AxiosError, AxiosResponse } from 'axios'
+import { EMAIL_REGEX } from '../../helpers/string'
 
 interface ContactInfo {
   name: string
@@ -12,6 +15,22 @@ interface ContactInfo {
 interface QueryParams {
   conversationId: string
   reference: string
+}
+
+interface UpdatePayload {
+  newEmail?: string
+  newZipcode?: string
+}
+
+interface ApiResponse extends AxiosResponse {
+  data: {
+    type: string
+    message: string
+  }
+}
+
+interface ApiResponseError extends AxiosError {
+  response?: ApiResponse
 }
 
 function Home() {
@@ -28,6 +47,24 @@ function Home() {
   // errorMsg === undefined means no error, empty string means an error without message
   const [errorMsg, setErrorMsg] = useState<string | undefined>('Please select an SMS conversation')
   const { data, isPending, error } = useConversationSummaryQuery(queryParams.conversationId, queryParams.reference)
+  const { mutate, isError, error: updateError } = useUpdateConversationSummary()
+
+  const debouncedUpdate = useCallback(debounce(({ newEmail, newZipcode }: UpdatePayload) => {
+    if (contactInfo.phoneNumber) {
+      mutate({ phone: contactInfo.phoneNumber, email: newEmail, zipcode: newZipcode })
+    }
+  }, 1000), [contactInfo])
+
+  const handleEmailInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (EMAIL_REGEX.test(event.target.value)) {
+      debouncedUpdate({ newEmail: event.target.value })
+    }
+  }
+
+  const handleZipcodeInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    debouncedUpdate({ newZipcode: event.target.value })
+  }
+
   const handleConversationChange = debounce((ids: string[]) => {
     Missive.fetchConversations(ids)
       .then(conversations => {
@@ -45,7 +82,6 @@ function Home() {
           info.phoneNumber = contact.phone_number
           params.conversationId = convo.id
           params.reference = contact.phone_number
-
           setErrorMsg(undefined)
         } else {
           setErrorMsg('')
@@ -100,11 +136,17 @@ function Home() {
       <div className="relative z-0">
         <input type="text" id="floating-email"
                className="block py-2.5 px-0 w-full text-lg bg-transparent appearance-none focus:outline-none focus:ring-0 peer focus:shadow-none text-missive-text-color-e cursor-text"
-               placeholder={conversation.author_email || ' '} />
+               onChange={handleEmailInputChange}
+               placeholder={conversation.author_email || ' '}
+        />
         {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
         <label htmlFor="floating-email"
-               className="text-missive-text-color-e cursor-text peer-focus:text-missive-blue-color absolute text-lg duration-300 transform -translate-y-6 scale-75 top-3 origin-[0] peer-focus:start-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">
+               className="pl-2 text-missive-text-color-e cursor-text peer-focus:text-missive-blue-color absolute text-lg duration-300 transform -translate-y-6 scale-75 top-3 origin-[0] peer-focus:start-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">
           Email</label>
+        {isError ?
+          <div className="text-red-500">
+            {(updateError as ApiResponseError).response?.data.type === 'email' ? (updateError as ApiResponseError).response?.data.message : ''}
+          </div> : null}
       </div>
 
       <div className="mt-2 rounded-xl bg-missive-light-border-color p-4">
@@ -122,13 +164,20 @@ function Home() {
           <div className="relative z-0 ml-1">
             <input type="number" id="floating-zipcode"
                    className="block w-full p-0 text-sm appearance-none focus:outline-none focus:ring-0 peer focus:shadow-none text-missive-text-color-e cursor-text"
+                   onChange={handleZipcodeInputChange}
                    placeholder={conversation.author_zipcode || ' '} />
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-            <label htmlFor="floating-zipcode"
-                   className="px-2 text-missive-text-color-e cursor-text peer-focus:text-missive-blue-color absolute text-sm top-0 duration-300 transform -translate-y-4 scale-75 origin-[0] peer-focus:start-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">
-              Zip code</label>
+            <label
+              htmlFor="floating-zipcode"
+              className="pl-1 text-missive-text-color-e cursor-text peer-focus:text-missive-blue-color absolute text-sm top-0 duration-300 transform -translate-y-4 scale-75 origin-[0] peer-focus:start-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">
+              Zip code
+            </label>
           </div>
         </div>
+        {isError ?
+          <div className="text-red-500">
+            {(updateError as ApiResponseError).response?.data.type === 'zipcode' ? (updateError as ApiResponseError).response?.data.message : ''}
+          </div> : null}
 
         <div className="pt-2">
           Reporters contacted:{' '}

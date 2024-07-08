@@ -16,7 +16,9 @@ export default function App(): ReactElement {
   )
   return (
     <HashRouter>
-      <div className='h-screen overflow-y-scroll bg-missive-background-color text-missive-text-color-a missive-scroll'>{router}</div>
+      <div
+        className="h-screen overflow-y-scroll bg-missive-background-color text-missive-text-color-a missive-scroll">{router}
+      </div>
     </HashRouter>
   )
 }
