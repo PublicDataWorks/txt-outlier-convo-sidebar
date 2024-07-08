@@ -25,7 +25,7 @@ interface UpdatePayload {
 interface ApiResponse extends AxiosResponse {
   data: {
     type: string
-    message: string
+    msg: string
   }
 }
 
@@ -34,6 +34,7 @@ interface ApiResponseError extends AxiosError {
 }
 
 function Home() {
+  // Available data from the SDK
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     name: '',
     phoneNumber: ''
@@ -48,6 +49,8 @@ function Home() {
   const [errorMsg, setErrorMsg] = useState<string | undefined>('Please select an SMS conversation')
   const { data, isPending, error } = useConversationSummaryQuery(queryParams.conversationId, queryParams.reference)
   const { mutate, isError, error: updateError } = useUpdateConversationSummary()
+  const [email, setEmail] = useState('')
+  const [zipcode, setZipcode] = useState('')
 
   const debouncedUpdate = useCallback(debounce(({ newEmail, newZipcode }: UpdatePayload) => {
     if (contactInfo.phoneNumber) {
@@ -56,12 +59,14 @@ function Home() {
   }, 1000), [contactInfo])
 
   const handleEmailInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setEmail(event.target.value)
     if (EMAIL_REGEX.test(event.target.value)) {
       debouncedUpdate({ newEmail: event.target.value })
     }
   }
 
   const handleZipcodeInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setZipcode(event.target.value)
     debouncedUpdate({ newZipcode: event.target.value })
   }
 
@@ -99,15 +104,17 @@ function Home() {
 
   useEffect(() => {
     if (data?.data) {
+      setEmail(data.data.author_email || '')
+      setZipcode(data.data.author_zipcode || '')
       void Missive.fetchLabels().then(missivelabels => {
         const labelWithInfo = data.data.labels
           .map(labelId => missivelabels.find(label => label.id === labelId))
+          .filter(label => label)
 
         const keywords = labelWithInfo
           .filter(label => label?.parent_id === import.meta.env.VITE_KEYWORD_LABEL_ID)
           // @ts-expect-error TS doesn't recognize that filter ensures non-null values
           .map(label => label.name)
-
         const impacts = labelWithInfo
           .filter(label => label && label.parent_id !== import.meta.env.VITE_KEYWORD_LABEL_ID)
           // @ts-expect-error TS doesn't recognize that filter ensures non-null values
@@ -137,15 +144,22 @@ function Home() {
         <input type="text" id="floating-email"
                className="block py-2.5 px-0 w-full text-lg bg-transparent appearance-none focus:outline-none focus:ring-0 peer focus:shadow-none text-missive-text-color-e cursor-text"
                onChange={handleEmailInputChange}
-               placeholder={conversation.author_email || ' '}
+               value={email}
         />
         {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-        <label htmlFor="floating-email"
-               className="pl-2 text-missive-text-color-e cursor-text peer-focus:text-missive-blue-color absolute text-lg duration-300 transform -translate-y-6 scale-75 top-3 origin-[0] peer-focus:start-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">
-          Email</label>
+        <label
+          htmlFor="floating-email"
+          className={`pl-2 text-missive-text-color-e cursor-text peer-focus:text-missive-blue-color absolute text-lg duration-300 transform top-3 origin-[0] peer-focus:start-0 ${
+            email
+              ? 'scale-75 -translate-y-6 rtl:translate-x-1/4 rtl:left-auto'
+              : 'scale-100 translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 peer-focus:rtl:translate-x-1/4 peer-focus:rtl:left-auto'
+          }`}
+        >
+          Email
+        </label>
         {isError ?
           <div className="text-red-500">
-            {(updateError as ApiResponseError).response?.data.type === 'email' ? (updateError as ApiResponseError).response?.data.message : ''}
+            {(updateError as ApiResponseError).response?.data.type === 'email' ? (updateError as ApiResponseError).response?.data.msg : ''}
           </div> : null}
       </div>
 
@@ -162,21 +176,26 @@ function Home() {
         <div className="pt-2 flex">
           <div>Zip code:</div>
           <div className="relative z-0 ml-1">
-            <input type="number" id="floating-zipcode"
+            <input type="text" id="floating-zipcode"
                    className="block w-full p-0 text-sm appearance-none focus:outline-none focus:ring-0 peer focus:shadow-none text-missive-text-color-e cursor-text"
                    onChange={handleZipcodeInputChange}
-                   placeholder={conversation.author_zipcode || ' '} />
+                   value={zipcode} />
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label
               htmlFor="floating-zipcode"
-              className="pl-1 text-missive-text-color-e cursor-text peer-focus:text-missive-blue-color absolute text-sm top-0 duration-300 transform -translate-y-4 scale-75 origin-[0] peer-focus:start-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">
+              className={`pl-1 text-missive-text-color-e cursor-text peer-focus:text-missive-blue-color absolute text-sm top-0 duration-300 transform origin-[0] peer-focus:start-0 ${
+                zipcode
+                  ? 'scale-75 -translate-y-4 rtl:translate-x-1/4 rtl:left-auto'
+                  : 'scale-100 translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 peer-focus:rtl:translate-x-1/4 peer-focus:rtl:left-auto'
+              }`}
+            >
               Zip code
             </label>
           </div>
         </div>
         {isError ?
           <div className="text-red-500">
-            {(updateError as ApiResponseError).response?.data.type === 'zipcode' ? (updateError as ApiResponseError).response?.data.message : ''}
+            {(updateError as ApiResponseError).response?.data.type === 'zipcode' ? (updateError as ApiResponseError).response?.data.msg : ''}
           </div> : null}
 
         <div className="pt-2">

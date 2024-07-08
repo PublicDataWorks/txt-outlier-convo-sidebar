@@ -42,7 +42,7 @@ const useUpdateConversationSummary = () =>
       const updatedData = {} as ContactUpdatePayload
       if (zipcode) updatedData.zipcode = zipcode
       if (email) updatedData.email = email
-      return axios.post(`${CONTACT_PATH}/${encodeURIComponent(phone)}`, updatedData)
+      return axios.patch(`${CONTACT_PATH}/${encodeURIComponent(phone)}`, updatedData)
     }
   })
 
