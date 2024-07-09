@@ -40,8 +40,9 @@ const useUpdateConversationSummary = () =>
   useMutation({
     mutationFn: async ({ phone, zipcode, email }: MutationProps) => {
       const updatedData = {} as ContactUpdatePayload
-      if (zipcode) updatedData.zipcode = zipcode
-      if (email) updatedData.email = email
+      // Allow empty to clear the field
+      if (zipcode !== undefined) updatedData.zipcode = zipcode
+      if (email !== undefined) updatedData.email = email
       return axios.patch(`${CONTACT_PATH}/${encodeURIComponent(phone)}`, updatedData)
     }
   })
