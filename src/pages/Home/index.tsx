@@ -59,7 +59,7 @@ function Home() {
 
   const handleEmailInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value)
-    if (EMAIL_REGEX.test(event.target.value)) {
+    if (EMAIL_REGEX.test(event.target.value) || event.target.value === '') {
       debouncedUpdate({ newEmail: event.target.value })
     }
   }
