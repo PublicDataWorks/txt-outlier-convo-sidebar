@@ -11,6 +11,8 @@ interface ConversationSummary {
   first_reply: number
   last_reply: number
   labels: string[]
+  keyword_label_parent_id: string
+  impact_label_parent_id: string
   messages: string
   outcome: string
 }
