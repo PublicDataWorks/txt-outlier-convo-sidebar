@@ -6,6 +6,7 @@ import { useConversationSummaryQuery, useUpdateConversationSummary } from '../..
 import Spinner from '../../components/Spinner'
 import type { AxiosError, AxiosResponse } from 'axios'
 import { EMAIL_REGEX } from '../../helpers/string'
+import useAuthorChanges from '../../hooks/supabase'
 
 interface ContactInfo {
   name: string
@@ -49,9 +50,7 @@ function Home() {
   const [errorMsg, setErrorMsg] = useState<string | undefined>('Please select an SMS conversation')
   const { data, isPending, error } = useConversationSummaryQuery(queryParams.conversationId, queryParams.reference)
   const { mutate, isError, error: updateError } = useUpdateConversationSummary()
-  const [email, setEmail] = useState('')
-  const [zipcode, setZipcode] = useState('')
-
+  const { email, setEmail, zipcode, setZipcode } = useAuthorChanges()
   const debouncedUpdate = useCallback(debounce(({ newEmail, newZipcode }: UpdatePayload) => {
     if (contactInfo.phoneNumber) {
       mutate({ phone: contactInfo.phoneNumber, email: newEmail, zipcode: newZipcode })
