@@ -111,11 +111,11 @@ function Home() {
           .filter(label => label)
 
         const keywords = labelWithInfo
-          .filter(label => label?.parent_id === import.meta.env.VITE_KEYWORD_LABEL_ID)
+          .filter(label => label?.parent_id === data.data.keyword_label_parent_id)
           // @ts-expect-error TS doesn't recognize that filter ensures non-null values
           .map(label => label.name)
         const impacts = labelWithInfo
-          .filter(label => label && label.parent_id !== import.meta.env.VITE_KEYWORD_LABEL_ID)
+          .filter(label => label?.parent_id === data.data.impact_label_parent_id)
           // @ts-expect-error TS doesn't recognize that filter ensures non-null values
           .map(label => label.name)
 
