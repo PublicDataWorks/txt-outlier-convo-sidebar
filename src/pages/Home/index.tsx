@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react'
+import type { ChangeEvent } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { debounce } from 'lodash'
 import { formatUnixTimestamp } from '../../helpers/date'
-import { useConversationSummaryQuery } from '../../hooks/conversation'
+import { useConversationSummaryQuery, useUpdateConversationSummary } from '../../hooks/conversation'
 import Spinner from '../../components/Spinner'
+import type { AxiosError, AxiosResponse } from 'axios'
+import { EMAIL_REGEX } from '../../helpers/string'
 
 interface ContactInfo {
   name: string
@@ -14,10 +17,27 @@ interface QueryParams {
   reference: string
 }
 
+interface UpdatePayload {
+  newEmail?: string
+  newZipcode?: string
+}
+
+interface ApiResponse extends AxiosResponse {
+  data: {
+    type: string
+    msg: string
+  }
+}
+
+interface ApiResponseError extends AxiosError {
+  response?: ApiResponse
+}
+
 function Home() {
+  // Available data from the SDK
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     name: '',
-    phoneNumber: '',
+    phoneNumber: ''
   })
   const [queryParams, setQueryParams] = useState<QueryParams>({
     conversationId: '',
@@ -28,6 +48,28 @@ function Home() {
   // errorMsg === undefined means no error, empty string means an error without message
   const [errorMsg, setErrorMsg] = useState<string | undefined>('Please select an SMS conversation')
   const { data, isPending, error } = useConversationSummaryQuery(queryParams.conversationId, queryParams.reference)
+  const { mutate, isError, error: updateError } = useUpdateConversationSummary()
+  const [email, setEmail] = useState('')
+  const [zipcode, setZipcode] = useState('')
+
+  const debouncedUpdate = useCallback(debounce(({ newEmail, newZipcode }: UpdatePayload) => {
+    if (contactInfo.phoneNumber) {
+      mutate({ phone: contactInfo.phoneNumber, email: newEmail, zipcode: newZipcode })
+    }
+  }, 1000), [contactInfo])
+
+  const handleEmailInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setEmail(event.target.value)
+    if (EMAIL_REGEX.test(event.target.value)) {
+      debouncedUpdate({ newEmail: event.target.value })
+    }
+  }
+
+  const handleZipcodeInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setZipcode(event.target.value)
+    debouncedUpdate({ newZipcode: event.target.value })
+  }
+
   const handleConversationChange = debounce((ids: string[]) => {
     Missive.fetchConversations(ids)
       .then(conversations => {
@@ -45,7 +87,6 @@ function Home() {
           info.phoneNumber = contact.phone_number
           params.conversationId = convo.id
           params.reference = contact.phone_number
-
           setErrorMsg(undefined)
         } else {
           setErrorMsg('')
@@ -63,15 +104,17 @@ function Home() {
 
   useEffect(() => {
     if (data?.data) {
+      setEmail(data.data.author_email || '')
+      setZipcode(data.data.author_zipcode || '')
       void Missive.fetchLabels().then(missivelabels => {
         const labelWithInfo = data.data.labels
           .map(labelId => missivelabels.find(label => label.id === labelId))
+          .filter(label => label)
 
         const keywords = labelWithInfo
           .filter(label => label?.parent_id === import.meta.env.VITE_KEYWORD_LABEL_ID)
           // @ts-expect-error TS doesn't recognize that filter ensures non-null values
           .map(label => label.name)
-
         const impacts = labelWithInfo
           .filter(label => label && label.parent_id !== import.meta.env.VITE_KEYWORD_LABEL_ID)
           // @ts-expect-error TS doesn't recognize that filter ensures non-null values
@@ -97,7 +140,28 @@ function Home() {
     <div className="px-4 pt-2">
       <div className="text-xl font-bold">{contactInfo.name}</div>
       <div className="text-lg">{contactInfo.phoneNumber}</div>
-      <div className="text-lg">{conversation.author_email}</div>
+      <div className="relative z-0">
+        <input type="text" id="floating-email"
+               className="block py-2.5 px-0 w-full text-lg bg-transparent appearance-none focus:outline-none focus:ring-0 peer focus:shadow-none text-missive-text-color-e cursor-text"
+               onChange={handleEmailInputChange}
+               value={email}
+        />
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+        <label
+          htmlFor="floating-email"
+          className={`pl-2 text-missive-text-color-e cursor-text peer-focus:text-missive-blue-color absolute text-lg duration-300 transform top-3 origin-[0] peer-focus:start-0 ${
+            email
+              ? 'scale-75 -translate-y-6 rtl:translate-x-1/4 rtl:left-auto'
+              : 'scale-100 translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 peer-focus:rtl:translate-x-1/4 peer-focus:rtl:left-auto'
+          }`}
+        >
+          Email
+        </label>
+        {isError ?
+          <div className="text-red-500">
+            {(updateError as ApiResponseError).response?.data.type === 'email' ? (updateError as ApiResponseError).response?.data.msg : ''}
+          </div> : null}
+      </div>
 
       <div className="mt-2 rounded-xl bg-missive-light-border-color p-4">
         <div>
@@ -109,9 +173,31 @@ function Home() {
             {formatUnixTimestamp(conversation.last_reply)}
           </span>
         </div>
-        <div className="pt-2">
-          Zip code: <span className="font-bold">{conversation.author_zipcode}</span>
+        <div className="pt-2 flex">
+          <div>Zip code:</div>
+          <div className="relative z-0 ml-1">
+            <input type="text" id="floating-zipcode"
+                   className="block w-full p-0 text-sm appearance-none focus:outline-none focus:ring-0 peer focus:shadow-none text-missive-text-color-e cursor-text"
+                   onChange={handleZipcodeInputChange}
+                   value={zipcode} />
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+            <label
+              htmlFor="floating-zipcode"
+              className={`pl-1 text-missive-text-color-e cursor-text peer-focus:text-missive-blue-color absolute text-sm top-0 duration-300 transform origin-[0] peer-focus:start-0 ${
+                zipcode
+                  ? 'scale-75 -translate-y-4 rtl:translate-x-1/4 rtl:left-auto'
+                  : 'scale-100 translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 peer-focus:rtl:translate-x-1/4 peer-focus:rtl:left-auto'
+              }`}
+            >
+              Zip code
+            </label>
+          </div>
         </div>
+        {isError ?
+          <div className="text-red-500">
+            {(updateError as ApiResponseError).response?.data.type === 'zipcode' ? (updateError as ApiResponseError).response?.data.msg : ''}
+          </div> : null}
+
         <div className="pt-2">
           Reporters contacted:{' '}
           <span className="font-bold">{conversation.assignee_user_name.join(', ')}</span>

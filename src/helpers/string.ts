@@ -1,7 +1,5 @@
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-export {
-  // eslint-disable-next-line import/prefer-default-export
-  capitalize
-}
+export { EMAIL_REGEX, capitalize }
