@@ -106,7 +106,7 @@ function Home() {
         <div className="pt-2">
           Most recent reply on{' '}
           <span className="font-bold">
-            {formatUnixTimestamp(conversation.most_recent_reply)}
+            {formatUnixTimestamp(conversation.last_reply)}
           </span>
         </div>
         <div className="pt-2">
