@@ -28,12 +28,15 @@ interface MutationProps {
   email?: string
 }
 
-const useConversationSummaryQuery = (conversationId: string, reference: string) =>
+const useConversationSummaryQuery = (conversationId: string, reference: string, onSuccess: () => void) =>
   useQuery({
     queryKey: ['conversationSummary', conversationId, reference],
-    queryFn: async (): Promise<AxiosResponse<ConversationSummary>> =>
-      axios.get(`${CONVERSATION_SUMMARY_PATH}/${conversationId}?reference=${encodeURIComponent(reference)}`)
-    ,
+    queryFn: async (): Promise<ConversationSummary> => {
+      const res: AxiosResponse<ConversationSummary> =
+        await axios.get(`${CONVERSATION_SUMMARY_PATH}/${conversationId}?reference=${encodeURIComponent(reference)}`)
+      onSuccess()
+      return res.data
+    },
     enabled: !!conversationId && !!reference,
     refetchInterval: 1000 * 30
   })
