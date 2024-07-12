@@ -46,11 +46,18 @@ function Home() {
   })
   const [keywordLabels, setKeywordLabels] = useState<string[]>([])
   const [impactLabels, setImpactLabels] = useState<string[]>([])
-  // errorMsg === undefined means no error, empty string means an error without message
+  // errorMsg === undefined means no error, empty string means an error without a message
   const [errorMsg, setErrorMsg] = useState<string | undefined>('Please select an SMS conversation')
-  const { data, isPending, error } = useConversationSummaryQuery(queryParams.conversationId, queryParams.reference)
   const { mutate, isError, error: updateError } = useUpdateConversationSummary()
-  const { email, setEmail, zipcode, setZipcode } = useAuthorChanges()
+  const {
+    email,
+    setEmail,
+    zipcode,
+    setZipcode,
+    newMessage,
+    setNewMessage
+  } = useAuthorChanges(queryParams.conversationId, queryParams.reference)
+
   const debouncedUpdate = useCallback(debounce(({ newEmail, newZipcode }: UpdatePayload) => {
     if (contactInfo.phoneNumber) {
       mutate({ phone: contactInfo.phoneNumber, email: newEmail, zipcode: newZipcode })
@@ -63,13 +70,22 @@ function Home() {
       debouncedUpdate({ newEmail: event.target.value })
     }
   }
+  const handleQuerySuccess = useCallback(() => {
+    setNewMessage(false)
+  }, [])
+
+  const {
+    data,
+    isPending,
+    error
+  } = useConversationSummaryQuery(queryParams.conversationId, queryParams.reference, handleQuerySuccess)
 
   const handleZipcodeInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setZipcode(event.target.value)
     debouncedUpdate({ newZipcode: event.target.value })
   }
 
-  const handleConversationChange = debounce((ids: string[]) => {
+  const handleConversationChange = useCallback(debounce((ids: string[]) => {
     Missive.fetchConversations(ids)
       .then(conversations => {
         if (conversations.length !== 1) {
@@ -92,30 +108,31 @@ function Home() {
         }
         setContactInfo(info)
         setQueryParams(params)
+        setNewMessage(false)
       })
       // eslint-disable-next-line no-console
       .catch(console.error)
-  }, 300)
+  }, 300), [])
 
   useEffect(() => {
     Missive.on('change:conversations', handleConversationChange)
   }, [])
 
   useEffect(() => {
-    if (data?.data) {
-      setEmail(data.data.author_email || '')
-      setZipcode(data.data.author_zipcode || '')
+    if (data) {
+      setEmail(data.author_email || '')
+      setZipcode(data.author_zipcode || '')
       void Missive.fetchLabels().then(missivelabels => {
-        const labelWithInfo = data.data.labels
+        const labelWithInfo = data.labels
           .map(labelId => missivelabels.find(label => label.id === labelId))
           .filter(label => label)
 
         const keywords = labelWithInfo
-          .filter(label => label?.parent_id === data.data.keyword_label_parent_id)
+          .filter(label => label?.parent_id === data.keyword_label_parent_id)
           // @ts-expect-error TS doesn't recognize that filter ensures non-null values
           .map(label => label.name)
         const impacts = labelWithInfo
-          .filter(label => label?.parent_id === data.data.impact_label_parent_id)
+          .filter(label => label?.parent_id === data.impact_label_parent_id)
           // @ts-expect-error TS doesn't recognize that filter ensures non-null values
           .map(label => label.name)
 
@@ -133,10 +150,10 @@ function Home() {
   if (isPending) {
     return <Spinner />
   }
-  const conversation = data.data
+  const conversation = data
 
   return (
-    <div className="px-4 pt-2">
+    <div className={`px-4 pt-2 ${newMessage ? 'cursor-progress' : ''}`}>
       <div className="text-xl font-bold">{contactInfo.name}</div>
       <div className="text-lg">{contactInfo.phoneNumber}</div>
       <div className="relative z-0">
