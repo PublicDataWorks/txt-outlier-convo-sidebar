@@ -151,7 +151,6 @@ function Home() {
     return <Spinner />
   }
   const conversation = data
-
   return (
     <div className={`px-4 pt-2 ${newMessage ? 'cursor-progress' : ''}`}>
       <div className="text-xl font-bold">{contactInfo.name}</div>
@@ -226,11 +225,11 @@ function Home() {
           ))}
         </div>
       </div>
-
-      <div className="mb-2 mt-4 font-bold">Reporter notes</div>
+      {/* eslint-disable-next-line  @typescript-eslint/prefer-nullish-coalescing */}
+      <div className="mb-2 mt-4 font-bold">{conversation.comments_title || 'Reporter notes'}</div>
       <div className="rounded-xl bg-missive-light-border-color p-4 italic">{conversation.comments}</div>
-
-      <div className="mb-2 mt-4 font-bold">Impact and outcomes</div>
+      {/* eslint-disable-next-line  @typescript-eslint/prefer-nullish-coalescing */}
+      <div className="mb-2 mt-4 font-bold">{conversation.outcome_title || 'Impact and outcomes'}</div>
       <div className="rounded-xl bg-missive-light-border-color p-4">
         <div className="pb-2 italic">{conversation.outcome}</div>
         <div className="flex flex-wrap gap-2 pt-2">
@@ -241,8 +240,8 @@ function Home() {
           ))}
         </div>
       </div>
-
-      <div className="mb-2 mt-4 font-bold">Communication patterns</div>
+      {/* eslint-disable-next-line  @typescript-eslint/prefer-nullish-coalescing */}
+      <div className="mb-2 mt-4 font-bold">{conversation.messages_title || 'Communication patterns'}</div>
       <div className="rounded-xl bg-missive-light-border-color p-4 italic">{conversation.messages}</div>
     </div>
   )
