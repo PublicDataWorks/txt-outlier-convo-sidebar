@@ -46,8 +46,8 @@ function Home() {
   })
   const [keywordLabels, setKeywordLabels] = useState<string[]>([])
   const [impactLabels, setImpactLabels] = useState<string[]>([])
-  // errorMsg === undefined means no error, empty string means an error without a message
-  const [errorMsg, setErrorMsg] = useState<string | undefined>('Please select an SMS conversation')
+  // errorMsg === undefined means no error, empty string means an error without message
+  const [errorMsg, setErrorMsg] = useState<string | undefined>('Please select another SMS conversation to activate the conversation summary sidebar')
   const { mutate, isError, error: updateError } = useUpdateConversationSummary()
   const {
     email,
