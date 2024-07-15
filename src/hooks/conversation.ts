@@ -7,14 +7,17 @@ interface ConversationSummary {
   assignee_user_name: string[]
   author_email: string
   author_zipcode: string
-  comments: string
   first_reply: number
   last_reply: number
   labels: string[]
   keyword_label_parent_id: string
   impact_label_parent_id: string
   messages: string
+  messages_title?: string
   outcome: string
+  outcome_title?: string
+  comments: string
+  comments_title?: string
 }
 
 interface ContactUpdatePayload {
