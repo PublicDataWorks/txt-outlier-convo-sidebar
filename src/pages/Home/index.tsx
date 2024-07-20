@@ -96,7 +96,7 @@ function Home() {
         const params: QueryParams = { conversationId: '', reference: '' }
         // TS thinks it's a Conversation | undefined if we don't cast
         const convo: Conversation = conversations[0] as Conversation
-        const contact = convo.authors.find(author => author.phone_number !== import.meta.env.VITE_OUTLIER_PHONE_NUMBER)
+        const contact = convo.authors.find(phone => phone.phone_number && phone.phone_number !== import.meta.env.VITE_OUTLIER_PHONE_NUMBER)
         if (contact) {
           info.name = contact.name
           info.phoneNumber = contact.phone_number

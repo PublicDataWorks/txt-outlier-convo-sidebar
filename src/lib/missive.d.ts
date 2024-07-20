@@ -5,6 +5,7 @@ interface Conversation {
   labels: Label[]
   authors: Author[]
   messages: Message[]
+  phone_numbers: Phone[]
 }
 
 interface Organization {
@@ -36,6 +37,13 @@ interface Message {
   from_field: { phone_number: string }
   delivered_at: number
   author: { first_name: string; last_name: string } | null
+}
+
+interface Phone {
+  id: string
+  name: string
+  type: string
+  value: string
 }
 
 declare class MissiveClass {
