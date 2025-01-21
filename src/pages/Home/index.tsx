@@ -180,12 +180,12 @@ function Home() {
 
       <div className="mt-2 rounded-xl bg-missive-light-border-color p-4">
         <div>
-          First reply on <span className="font-bold">{formatUnixTimestamp(conversation.first_reply)}</span>
+          First reply on <span className="font-bold">{conversation.first_reply ? formatUnixTimestamp(conversation.first_reply) : "N/A"}</span>
         </div>
         <div className="pt-2">
           Most recent reply on{' '}
           <span className="font-bold">
-            {formatUnixTimestamp(conversation.last_reply)}
+            {conversation.last_reply ? formatUnixTimestamp(conversation.last_reply) : "N/A"}
           </span>
         </div>
         <div className="pt-2 flex">
